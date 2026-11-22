@@ -1,0 +1,30 @@
+Nov 21 01:29:31 omarchy kernel: omarchy-mlx-ser invoked oom-killer: gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0, oom_score_adj=0
+Nov 21 01:29:32 omarchy kernel: CPU: 6 UID: 1000 PID: 10653 Comm: omarchy-mlx-ser Tainted: G S                  7.2.11-16-1-ARCH #1 PREEMPT(full) 
+Nov 21 01:29:32 omarchy kernel: Tainted: [S]=CPU_OUT_OF_SPEC
+Nov 21 01:29:32 omarchy kernel: Hardware name: Apple Inc. MacBook Pro (14-inch, M2 Pro)/J414s, BIOS aura 1.0.0b13-g8c217751-dirty / U-Boot 2026.07-gd30213eadcaa-di 07/01/
+Nov 21 01:29:32 omarchy kernel: Call trace:
+Nov 21 01:29:32 omarchy kernel:  show_stack+0x18/0x24 (C)
+Nov 21 01:29:32 omarchy kernel:  dump_stack_lvl+0x3c/0x80
+Nov 21 01:29:32 omarchy kernel:  dump_stack+0x18/0x24
+Nov 21 01:29:32 omarchy kernel:  dump_header+0x44/0x154
+Nov 21 01:29:32 omarchy kernel:  oom_kill_process+0x15c/0x27c
+Nov 21 01:29:32 omarchy kernel:  out_of_memory+0x1e0/0x2c0
+Nov 21 01:29:32 omarchy kernel:  __alloc_pages_may_oom+0xd4/0x19c
+Nov 21 01:29:32 omarchy kernel:  __alloc_pages_slowpath+0x3c0/0x5a8
+Nov 21 01:29:32 omarchy kernel:  __alloc_frozen_pages_noprof+0x230/0x2a8
+Nov 21 01:29:32 omarchy kernel:  __folio_alloc_noprof+0x14/0x30
+Nov 21 01:29:32 omarchy kernel:  swap_cache_alloc_folio+0xe0/0x374
+Nov 21 01:29:32 omarchy kernel:  swapin_sync+0x44/0x78
+Nov 21 01:29:32 omarchy kernel:  do_swap_page+0x18c/0x10a8
+Nov 21 01:29:32 omarchy kernel:  handle_mm_fault+0x470/0x2584
+Nov 21 01:29:32 omarchy kernel:  do_page_fault+0x2a0/0x650
+Nov 21 01:29:32 omarchy kernel:  do_translation_fault+0x20/0x38
+Nov 21 01:29:32 omarchy kernel:  do_mem_abort+0x40/0xec
+Nov 21 01:29:32 omarchy kernel:  el1_abort+0x44/0x64
+Nov 21 01:29:32 omarchy kernel:  el1h_64_sync_handler+0x50/0xfc
+Nov 21 01:29:32 omarchy kernel:  el1h_64_sync+0x6c/0x70
+Nov 21 01:29:32 omarchy kernel:  do_sys_poll+0x54c/0x57c (P)
+Nov 21 01:29:32 omarchy kernel:  __arm64_sys_ppoll+0x7c/0x124
+Nov 21 01:29:32 omarchy kernel:  invoke_syscall+0x4c/0xd8
+Nov 21 01:29:32 omarchy kernel:  do_el0_svc+0x64/0xa8
+Nov 21 01:29:32 omarchy kernel:  el0_svc+0x40/0x104

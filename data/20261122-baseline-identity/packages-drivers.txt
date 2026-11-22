@@ -1,0 +1,63 @@
+## packages
+alsa-ucm-conf-aurora 10.aurora3-1
+asahi-alarm-keyring 20241216-1
+asahi-fwextract 0.9.2-1
+asahi-scripts 20261023-1
+aurora-audio 4.1.aurora3-3
+aurora-bless 0.4.4.aurora2-1
+linux-aurora 7.2.11.aurora16-1
+linux-aurora-headers 7.2.11.aurora16-1
+m1n1-aurora 1.6.1.aurora23-2
+mesa-aurora 1:26.3.0_devel.20261107.231485.b7b03c5b3b8-3
+omarchy-aurora-firmware 20261014-7
+speakerguardd 0.1.0.aurora3-1
+uboot-aurora 2026.07.aurora6-1
+util-linux 2.42.4-1
+vulkan-aurora 1:26.3.0_devel.20261107.231485.b7b03c5b3b8-3
+vulkan-icd-loader 1.4.363.0-1
+vulkan-mesa-implicit-layers 1:26.2.7-1
+## icd
+-- /usr/share/vulkan/icd.d/asahi_icd.aarch64.json
+{
+    "ICD": {
+        "api_version": "1.4.363",
+        "library_arch": "64",
+        "library_path": "/usr/lib/libvulkan_asahi.so"
+    },
+    "file_format_version": "1.0.1"
+}## drm
+/sys/class/drm/card1 -> /sys/devices/platform/soc/soc:display-subsystem driver=apple-drm
+/sys/class/drm/card1-DP-1 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card1-DP-2 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card1-DP-3 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card1-DP-4 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card1-DP-5 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card1-DP-6 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card1-eDP-1 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card1-HDMI-A-1 -> /sys/devices/platform/soc/soc:display-subsystem/drm/card1 driver=driver
+/sys/class/drm/card2 -> /sys/devices/platform/soc/406400000.gpu driver=asahi
+## asahi module
+asahi
+total 0
+drwxr-xr-x   7 root root     0 Nov 22 11:11 .
+drwxr-xr-x 259 root root     0 Dec 31  1969 ..
+-r--r--r--   1 root root 16384 Nov 22 11:11 coresize
+drwxr-xr-x   2 root root     0 Nov 22 11:11 drivers
+drwxr-xr-x   2 root root     0 Nov 22 11:11 holders
+-r--r--r--   1 root root 16384 Nov 22 11:11 initsize
+-r--r--r--   1 root root 16384 Nov 10 09:39 initstate
+drwxr-xr-x   2 root root     0 Nov 22 11:11 notes
+drwxr-xr-x   2 root root     0 Nov 22 10:41 parameters
+filename:       /lib/modules/7.2.11-16-1-ARCH/kernel/drivers/gpu/drm/asahi/asahi.ko
+description:    AGX GPU driver for Apple silicon SoCs
+license:        Dual MIT/GPL
+author:         AGX driver maintainer
+license:        Dual MIT/GPL
+## config
+CONFIG_RUST=y
+CONFIG_HAVE_RUST=y
+CONFIG_DRM_ASAHI=m
+# CONFIG_DRM_ASAHI_DEBUG_ALLOCATOR is not set
+CONFIG_DRM_ASAHI_UAT_ADOPTION=y
+CONFIG_DRM_ASAHI_M3_T8122=y
+CONFIG_DRM_ASAHI_G15=y

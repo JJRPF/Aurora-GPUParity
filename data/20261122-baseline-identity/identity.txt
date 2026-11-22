@@ -1,0 +1,25 @@
+## date
+2026-11-22T11:11:36-05:00
+## uname
+Linux omarchy 7.2.11-16-1-ARCH #1 SMP PREEMPT_DYNAMIC Tue, 10 Nov 2026 04:25:47 +0000 aarch64 GNU/Linux
+## compatible
+apple,j414s
+apple,t6020
+apple,arm-platform
+## model
+Apple MacBook Pro (14-inch, M2 Pro, 2023)
+## cmdline
+root=UUID=<redacted> rw rootflags=subvol=@,x-systemd.device-timeout=0 zswap.enabled=0 rootfstype=btrfs user4k=on reserve_mem=1M:2M:oops rd.luks.name=<redacted>=root quiet splash loglevel=0 systemd.show_status=false rd.udev.log_level=0 vt.global_cursor_default=0 plymouth.ignore-serial-consoles
+## boots
+ -7 b11c66aad5f44f2283eff98205fd95be Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 01:49:16 EST
+ -6 e2e42d171d084e2fa4cc70b1c13797df Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 01:55:48 EST
+ -5 ccd936d4d9e948238de7f892cb840358 Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 02:03:53 EST
+ -4 c0846ebf43004516a98f95a20940471e Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 02:09:16 EST
+ -3 d1901fe8636d480e829d8ce35c5f09d6 Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 02:16:32 EST
+ -2 c2f3e313892a413a93db2515ce542f58 Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 02:25:41 EST
+ -1 35b32100824b413392a5ed5f18043e5f Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 07:30:44 EST
+  0 57feb27d74bd4816aec22b8b03e661fb Tue 2026-11-10 09:39:46 EST Sun 2026-11-22 11:08:58 EST
+## os-release
+NAME="Arch Linux ARM"
+PRETTY_NAME="Arch Linux ARM"
+ID=archarm
