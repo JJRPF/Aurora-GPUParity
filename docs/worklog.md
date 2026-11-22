@@ -115,6 +115,16 @@ changed, so no message to the S2R session. `ListAgents` shows no session named "
 is `gh-5-s2r-djnaeempaths-ea` (interactive, on the GH-5-S2R-DjNaeemPaths worktree), to be confirmed with
 the user before the first message.
 
+**G21. Trailer left in main history (mistake, not fixed).** After G20 the history on `main` still contains
+`3850a4b` ("Scaffold: ..."), whose message ends with `Co-Authored-By: Claude Sonnet 5.5` and a
+`Claude-Session:` line. Cause: the branch `quick-Scaffold` had been pushed with that commit (G17) and the
+user merged PR #1 at 10:55 (merge commit `812525d`), before the amended commit (no trailers, `6d0cb7f`) existed.
+`grove publish-quick` then rebased the later commits onto `main`. Checked with `git log` over all of `main`:
+exactly one commit (`3850a4b`) has a trailer; every later commit has none. Removing it needs a rewrite of
+`main` (rebase and force-push), which erases the PR #1 merge record, so it was not done without the user's
+decision. Also: PR #1 could not be closed (already merged); the `quick-Scaffold` worktree was removed.
+Lesson: do not push a branch before the commit message is final.
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry
