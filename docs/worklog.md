@@ -254,6 +254,11 @@ length) but not the #2701 timeouts. The #2701 boot had 116 timeouts under llama.
 needs more than one client submitting or memory pressure (cf. the OOM-related timeout in G29). The `compute_preempt=1`
 test (docs/preempt-test.md) still needs a reboot, so it waits for the S2R session; no message was sent, no hook changed.
 
+**G37. S2R start-of-work notice.** User rule: always message the S2R session when GPU work starts, so it can reboot
+freely without waiting on this session. Sent the first notice (no hooks, units or modprobe files changed; only userspace
+Vulkan tests; S2R may reboot; I will message again before any boot-affecting change). Recorded the rule in CLAUDE.md
+and in this machine's Claude memory.
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry

@@ -39,3 +39,10 @@ that session, are still enabled. Do not change those hooks. If one must change, 
 session with exactly what changed. When the user resumes that work, that session will message this one to
 save everything and stop. Then: commit and publish the worklog, reply to it, and tell it when it is good to
 reboot. No reboot for GPU tests happens before that.
+
+**Start-of-work notice (user rule, 2026-11-22):** whenever GPU work starts (a new session, or work resumed),
+the first action is a message to the S2R session (`gh-5-s2r-djnaeempaths-ea`) saying that work is running,
+what state is left on the machine (hooks, modprobe files, anything armed for a reboot), and that it may
+reboot without waiting for this session unless the message says otherwise. This lets S2R go through many
+reboots without waiting on this session, which would waste the user's context and usage. Send another message
+before any boot-affecting change. Log each notice in docs/worklog.md.
