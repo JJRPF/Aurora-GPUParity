@@ -125,6 +125,28 @@ exactly one commit (`3850a4b`) has a trailer; every later commit has none. Remov
 decision. Also: PR #1 could not be closed (already merged); the `quick-Scaffold` worktree was removed.
 Lesson: do not push a branch before the commit message is final.
 
+**G22. History rewritten to remove the trailer (user approved).** Cloned to a temp directory,
+`git filter-branch --msg-filter` dropping `Co-Authored-By:` and `Claude-Session:` lines from all commits,
+checked: 0 trailer lines left in `git log --format=%B`, tree of the new head identical to the old head
+(`7a02232`). Pushed with `--force-with-lease=main:7a02232` (main moved `7a02232` to `a8893c9`; every hash
+since the initial commit changed) and deleted the remote branch `quick-Scaffold`, which still held the old
+commit. Base clone `~/dev/Aurora-GPUParity/main` reset to `origin/main` (it had no local changes).
+Not removable by us: GitHub keeps the merged PR #1's head commit `3850a4b` reachable through
+`refs/pull/1/head`, so the trailers can still be seen through PR #1 (private repo). Removing that needs
+deleting the repo or a GitHub support request; not done.
+
+**G23. S2R channel test.** `ListAgents` showed `gh-5-s2r-djnaeempaths-ea` as the S2R session. The user
+confirmed it is the one ("The session is that one") and asked for a test message. Sent via SendMessage
+(`msg_id fdbdad69`): says no hooks or Aurora-DeepIdle files were touched, and repeats the protocol (S2R
+messages this session to save and stop; this session commits the worklog, replies, then says when it is
+good to reboot; no reboot before that). Delivery: queued in that session's inbox, not yet read when
+sent. No reply yet; not polled.
+
+**G24. Journal oddity (G13) explained by the user.** The SoC is the M2 Pro (T6020). The user says the journal
+with T6031/G14S lines and a Nov 10 date could be a journal copied here for the S2R work. Not verified:
+the first baseline step still checks which boot and which machine the journal lines belong to
+(`journalctl --list-boots`, `/proc/device-tree/compatible`) before any count is used.
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry
