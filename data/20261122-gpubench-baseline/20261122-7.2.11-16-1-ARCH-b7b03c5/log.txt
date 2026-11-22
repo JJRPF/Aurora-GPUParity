@@ -1,0 +1,4 @@
+### 11:17:16 suite submit.empty --depths 1,2,4,8,16,32,64
+### 11:17:28 suite compute.light --depths 1,2,4,8,16,32,64
+### 11:17:45 suite render.light --depths 1,2,4,8,16,32,64 --param kind=tri
+### 11:18:01 suite render.light --depths 1,8 --param kind=clear

@@ -204,6 +204,32 @@ session restarted: a memory-pressure event, a different cause from #2701. (b) bo
 * Other GPU parameters on this kernel: `robust_isolation`, `fault_control` (default 0xb), `initial_tvb_size`,
   `debug_flags`, plus G15/G17/M3 ones that do not apply to G14.
 
+**G31. gpubench baseline, preemption default.** Registered `aurora-silicon/gpubench` with grove (personal, no tracker,
+quick) and built it out of tree: `cmake -S ~/dev/gpubench/main -B ~/.cache/gpuparity/gpubench-build -G Ninja`,
+ninja, exit 0 (the base clone is not edited). `gpubench-vk --info`: device `Apple M2 Pro (G14S B1)`, driver
+`Borealis`, `Mesa 26.3.0-devel (git-b7b03c5b3b), Borealis, derived from Honeykrisp`, Vulkan 1.4.363, device-local
+heap 16,607,346,688 bytes. Ran `tools/run-linux.sh --device j414s-m2pro --chunks core-a` (11:17, 23 results,
+rc=0 each) then `--chunks core-b` (11:19, 21 results, rc=0 each; compute.heavy alu and bw, render.heavy fill 1080p).
+Kernel boot unchanged (`compute_preempt` default, no `asahi.*` options). **No GPU timeouts or faults** during
+either chunk (`journalctl -t kernel` count 0). Records:
+[data/20261122-gpubench-baseline/](../data/20261122-gpubench-baseline/). No macOS record exists to compare with.
+Not run: the `multi` and `feat` chunks, ray tracing, the stress suite (`gpubench-stress-vk`, which can fault the GPU).
+
+**G32. gpuprobe written.** `harness/gpuprobe/`: `gpuprobe.c` (Vulkan compute, an integer LCG/xorshift chain over
+4,194,304 invocations; `dispatch --ms N --count K --inflight 2` calibrates the iteration count to about N ms,
+keeps INFLIGHT submissions queued like llama.cpp, and hashes every result; `latency --seconds S` times a tiny
+dispatch every 16 ms from submit to fence, the compositor-like second client), `probe.comp`, `build.sh`,
+`run-ramp.sh` (steps 50 100 200 400 800 1500 3000 ms, six dispatches per step, the latency client in parallel,
+stops at the first step that logs a `GPU timeout` or gives a wrong hash). Build: glslangValidator + gcc, headers
+from gpubench's vendored `rt/third_party`. Sanity run, 20 ms: calibrated 797 iterations to 20.3 ms, 5 dispatches
+19.8 to 27.5 ms (one 49.6 ms that includes queueing behind the first), hash identical, 0 mismatches.
+
+**G33. Before the ramp (risk logged).** Running `run-ramp.sh` on the current boot (preemption off for this chip,
+per G9) to find the dispatch length at which a second client starts to wait and when the kernel logs a timeout.
+Risk: a timeout can corrupt the desktop and stall it for seconds (#2701), and a fail-stop would need a reboot.
+That risk is the point of reproducing it; the ramp stops at the first timeout. Way back: nothing is changed on
+the machine, so ending the run (or a reboot) restores everything.
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry
