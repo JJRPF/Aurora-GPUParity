@@ -152,6 +152,58 @@ message this session to save and stop before any S2R reboot, and will not reboot
 that it is safe. It says nothing is armed (S2R is waiting on an outside answer), so no reboot is expected
 soon. No reply sent; none needed. Still no GPU test boot until its sign-off or the user says otherwise.
 
+## 2026-11-22: baseline (read-only)
+
+**G26. Side task (user): /GPU page on jjrpf.com.** Asked mid-baseline. Registered `JJRPF/jjrpf.com` with grove
+(personal, no tracker, default quick, not directPush: that repo uses PRs). The site is a Cloudflare Worker
+(`worker/index.js`) serving static assets from the repo root; asset paths are case-sensitive, so the
+case-insensitive URL belongs in the Worker. Added `GPU/index.html` (CSS copied from `S2R/index.html`, static
+content: hero, phases 0 to 4, known and not known), a redirect in the Worker (first path segment compared
+lowercase against `S2R`, `GPU`; other spellings get a 301 to the canonical one, rest of path and query kept),
+sitemap entry and a homepage card. Tested the redirect in node with a stub ASSETS binding: `/gpu`, `/Gpu/`,
+`/gpu/index.html?x=1`, `/s2r/` redirect; `/GPU`, `/S2R/`, `/` pass through. Not previewed in a browser,
+not deployed. PR https://github.com/JJRPF/jjrpf.com/pull/5 (left open for the user to merge: merging
+deploys the public site). The page links no private repo. Data: none (code change).
+
+**G27. Identity (read-only).** `data/20261122-baseline-identity/identity.txt`: `uname` `7.2.11-16-1-ARCH`
+(built 2026-11-10), `/proc/device-tree/compatible` = `apple,j414s`, `apple,t6020`; model "Apple MacBook Pro
+(14-inch, M2 Pro, 2023)"; hostname `omarchy`; Arch Linux ARM; cmdline has no `asahi.*` word (disk UUIDs
+redacted in the saved copy). Packages (`packages-drivers.txt`): `linux-aurora 7.2.11.aurora16-1`,
+`mesa-aurora`/`vulkan-aurora 1:26.3.0_devel.20261107.231485.b7b03c5b3b8-3`, `m1n1-aurora 1.6.1.aurora23-2`,
+`uboot-aurora 2026.07.aurora6-1`, `omarchy-aurora-firmware 20261014-7`, `vulkan-icd-loader 1.4.363.0-1`.
+The installed Vulkan ICD is `/usr/lib/libvulkan_asahi.so` (the Borealis rename is not in this build).
+DRM: `card1` = `apple-drm` (display), `card2` = `406400000.gpu`, driver `asahi`; render node `renderD128`.
+
+**G28. Mistake: `journalctl -k` is current-boot only.** My first per-boot loop used `journalctl -k -b N` and
+`-k --since`; `-k` implies `-b` (current boot), so every row repeated boot 0 and all counts were 0. Wrong.
+Fixed in G29 by selecting kernel lines with `-t kernel` and counting across all boots. The file
+`per-boot-timeouts.txt` from that attempt was deleted, not committed.
+
+**G29. GPU error history (correct).** `journalctl -t kernel --grep 'GPU timeout nya|Fault info: FaultInfo|
+Attempting recovery|fail-stop|GPU is crashed' -o json` over the whole journal (99 boots, 581 MB, back to
+2026-11-10): 240 lines in `gpu-error-lines.jsonl`; per boot in `timeouts-by-boot.tsv`. **Only 2 of 99 boots
+have any GPU error.** (a) boot `0d54c2c8`: 1 timeout at 2026-11-21 01:29:35, right after a global
+out-of-memory kill (`omarchy-mlx-ser invoked oom-killer`, `claude` killed, `first-timeout-context.txt`) as the
+session restarted: a memory-pressure event, a different cause from #2701. (b) boot `74e3af50`: 116 timeouts and
+6 `Fault info` dumps between 2026-11-21 09:03:14 and 09:29:48: the #2701 session, matching the issue's 116
+(the journal confirms the report). Boot 0 (current, since 2026-11-22 07:34): no GPU error.
+
+**G30. Corrections to earlier entries.**
+* G13 "unexplained journal": explained. `Type: G14S` is the M2 Pro GPU (G14S/C/D = Pro/Max/Ultra), not an
+  M3 part, and 16 active cores matches a 16-core M2 Pro. The Nov 10 timestamps and `archlinux` hostname on the
+  first lines of each boot are the early-boot clock before the RTC is read (all 99 boots start at the same
+  fake time), plus the hostname before it is set. No copied journal needed; G24's theory is not needed.
+* The `/sys/module/asahi/parameters/` listing lacks `compute_preempt`, but `modinfo -p asahi` lists it:
+  `compute_preempt:Compute preemption (-1: M2 Max or Debug0; 0: off; nonzero: on) (i32)`. It exists on this
+  kernel, with no sysfs file.
+* **`asahi` is a loadable module (`CONFIG_DRM_ASAHI=m`)**, not built in. So the parameter can be set with
+  `options asahi compute_preempt=1` in `/etc/modprobe.d/` (takes effect when the module loads at boot) instead of
+  editing the kernel command line. The module has 46 users now (compositor and clients), so reloading it live
+  would kill the desktop session; not done.
+* `sudo -n true` succeeds silently: passwordless sudo is available to this user (group `wheel`).
+* Other GPU parameters on this kernel: `robust_isolation`, `fault_control` (default 0xb), `initial_tvb_size`,
+  `debug_flags`, plus G15/G17/M3 ones that do not apply to G14.
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry
