@@ -230,6 +230,21 @@ Risk: a timeout can corrupt the desktop and stall it for seconds (#2701), and a 
 That risk is the point of reproducing it; the ramp stops at the first timeout. Way back: nothing is changed on
 the machine, so ending the run (or a reboot) restores everything.
 
+**G34. Ramp on the default boot, single long dispatch.** `harness/gpuprobe/run-ramp.sh` with steps 50 to 3000 ms
+(one dispatch per submission, 2 in flight, a 16 ms latency client beside it). Result: **0 GPU timeouts at every step**,
+no hash mismatch, but the second client waits: p95 latency 2.9 ms at 50 ms, 12.9 ms at 1500 ms, 32 ms at 3000 ms;
+share of samples over 8.3 ms (a 120 Hz frame): 0 % at 50 ms, 29.7 % at 1500 ms, 34.9 % at 3000 ms; max 69.7 ms.
+Data: [data/20261122-ramp-default-preempt/](../data/20261122-ramp-default-preempt/). So one dispatch of up to 3 s does
+not trip the kill timeout here, but it does delay the compositor in proportion to its length, which fits "no preemption".
+
+**G35. Ramp, batched dispatches.** Added `--reps` (several 20 ms dispatches with a barrier in one command buffer) and
+`UNIT_MS` in run-ramp.sh. Steps 100 to 10000 ms per submission: **0 timeouts**, and the second client is not starved
+(p95 0.72 to 0.79 ms from 800 ms up, max 7.6 ms, 0 % over 8.3 ms). Dispatch boundaries let the GPU switch clients, so
+only a single long-running dispatch (a heavy kernel) hurts. Data:
+[data/20261122-ramp-default-preempt-batched/](../data/20261122-ramp-default-preempt-batched/).
+Not yet reproduced: an actual timeout. Next: single dispatches of 6 s and 12 s (logged before running, the risk is the
+#2701 desktop corruption; the ramp stops at the first timeout).
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry

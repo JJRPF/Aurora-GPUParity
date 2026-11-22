@@ -1,0 +1,8 @@
+device: Apple M2 Pro (G14S B1)
+calibrate: iters=32237 -> 789.4 ms
+dispatch 0: 788.0 ms
+dispatch 1: 1571.9 ms
+dispatch 2: 1541.6 ms
+dispatch 3: 1546.1 ms
+dispatch 4: 1544.9 ms
+dispatch 5: 1544.3 ms
