@@ -1,4 +1,4 @@
-# Where the work stands (2026-11-22, start of the repo)
+# Where the work stands (2026-11-22, baseline recorded)
 
 Machine: MacBook Pro 14" M2 Pro (T6020, `apple,j414s`, G14X, 32 GB), kernel `7.2.11-16-1-ARCH`
 (`linux-aurora 7.2.11.aurora16`), Mesa `mesa-aurora` 26.3.0-devel (Borealis).
@@ -19,6 +19,13 @@ Machine: MacBook Pro 14" M2 Pro (T6020, `apple,j414s`, G14X, 32 GB), kernel `7.2
   Throughput cost about 1% on M2 Max, 12 to 20% on M1 MoE decode.
 * **No Metal baseline for t6020 exists** in [gpubench](https://github.com/aurora-silicon/gpubench).
   Published macOS records are Neo (A18 Pro) and M5 Pro only.
+
+* **Baseline** (`data/20261122-baseline-identity/`): only 2 of 99 boots in the journal logged GPU errors. The
+  #2701 boot (2026-11-21 09:03 to 09:29) has 116 timeouts and 6 fault dumps; one other boot has 1 timeout
+  right after a global out-of-memory kill. The current boot (since 07:34) has none.
+* **`asahi` is a module** (`CONFIG_DRM_ASAHI=m`) and `modinfo` lists `compute_preempt`, so
+  `options asahi compute_preempt=1` in `/etc/modprobe.d/` is enough for the test; no kernel command line needed.
+* Passwordless sudo works for this user.
 
 ## Not yet known
 
