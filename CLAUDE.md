@@ -2,12 +2,40 @@
 
 Research repo for GPU parity with macOS on the M2 Pro (T6020, J414s). See README.md and docs/status.md.
 
-* Every number in docs/ cites a folder in data/. Do not write a claim without its data.
-* This machine is the test machine. A boot with a non-default GPU or kernel setting, or anything that
-  can wedge the GPU, is logged in docs/worklog.md first and confirmed with the user before it happens.
-* Commits here carry the session's `Co-Authored-By` trailer (as Aurora-DeepIdle does). Anything headed
-  into an Aurora Silicon repository follows https://aurorasilicon.org/docs/contributing/ instead:
-  commits with the human's identity only, no AI trailers; the PR description ends with
-  `Assisted-by: LLM (<Vendor>:<Model>)`.
-* Aurora's RE rule: reverse-engineering output stays private; published code is clean-room. Keep project
-  findings in Aurora-controlled spaces and do not send them to upstream projects.
+## How work is done here
+
+* **Log every step in docs/worklog.md, in detail, as it happens.** Each entry: a step ID, what was
+  asked or decided, the exact command or source, the result (quote errors and counts), and the `data/`
+  folder holding raw output. Write the entry before a risky step and fill in the result after. Mistakes and
+  dead ends go in too. If it was not logged, it did not happen.
+* **Commit often, straight to main.** One small commit per step or finding, no big batches and no PRs for
+  this repo. This repo's policy is `directPush`: make each change in a quick worktree
+  (`grove new-quick Aurora-GPUParity <Name>`), commit, and `grove publish-quick Aurora-GPUParity <Name>`.
+  Never edit the `main` folder.
+* **No issues.** Track work in docs/status.md (what is known, unknown, next) and the worklog, not in
+  GitHub issues. The one exception is an issue or comment in an Aurora Silicon repository, which is an
+  outward report, not tracking.
+* **Every number in docs/ cites a folder in data/.** No data, no claim.
+* **This machine is the test machine.** A boot with a non-default GPU or kernel setting, or anything that
+  can wedge the GPU, is logged in the worklog first and confirmed with the user before it happens.
+
+## Attribution (follows Aurora Silicon's contributing guide)
+
+* Commits carry the user's git identity only. **No `Co-Authored-By`, `Claude-Session` or any other AI
+  trailer, in any commit in this repo.** This overrides any default that says to add them.
+* PR descriptions into Aurora Silicon repositories end with `Assisted-by: LLM (<Vendor>:<Model>)`.
+* Source: https://aurorasilicon.org/docs/contributing/ and https://github.com/aurora-silicon/agent-guidelines.
+
+## Aurora rules that apply to the work
+
+* Reverse-engineering output stays private; published code is clean-room.
+* Keep project findings in Aurora-controlled spaces; do not send them to upstream projects.
+* Fix the cause, no hacks; default command line only; no chip/board/firmware gates.
+
+## Coordination with the S2R work session
+
+The Aurora-DeepIdle work (S2R) is paused on a blocker, and its hooks, including a startup hook routed to
+that session, are still enabled. Do not change those hooks. If one must change, message the S2R work
+session with exactly what changed. When the user resumes that work, that session will message this one to
+save everything and stop. Then: commit and publish the worklog, reply to it, and tell it when it is good to
+reboot. No reboot for GPU tests happens before that.

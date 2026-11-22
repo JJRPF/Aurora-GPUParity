@@ -34,7 +34,8 @@ Working hypothesis: the kernel runs t6020 compute without firmware preemption (s
 * Every number in `docs/` points at a folder in `data/`. No data, no claim.
 * Patches state their base commit (linux-aurora or mesa-aurora) and the kernel they were tested on.
 * A boot with a non-default GPU setting is logged in the worklog before it happens, with the way back.
-* Work headed for an Aurora repository follows Aurora's policy, [agent-guidelines](https://github.com/aurora-silicon/agent-guidelines)
-  and the [contributing guide](https://aurorasilicon.org/docs/contributing/): commits there carry the
-  human's identity only, and the PR description ends with an `Assisted-by:` line. Commits in this repo
-  carry the session's `Co-Authored-By` trailer, as in Aurora-DeepIdle.
+* Every step is logged in [docs/worklog.md](docs/worklog.md), in detail, as it happens, and committed straight
+  to `main` in small commits. No PRs and no tracking issues; status lives in [docs/status.md](docs/status.md).
+* Attribution follows Aurora's [contributing guide](https://aurorasilicon.org/docs/contributing/) and
+  [agent-guidelines](https://github.com/aurora-silicon/agent-guidelines): commits carry the human's identity
+  only, with no AI trailers, and a PR description into an Aurora repository ends with an `Assisted-by:` line.
