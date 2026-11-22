@@ -245,6 +245,15 @@ only a single long-running dispatch (a heavy kernel) hurts. Data:
 Not yet reproduced: an actual timeout. Next: single dispatches of 6 s and 12 s (logged before running, the risk is the
 #2701 desktop corruption; the ramp stops at the first timeout).
 
+**G36. Ramp, 6 s and 12 s single dispatches.** Three dispatches each, 2 in flight. **0 GPU timeouts, 0 hash mismatches**
+(`journalctl -t kernel` count 0 afterwards). The latency client waits longer (p95 68 to 69 ms, max 100 and 168 ms,
+24 to 29 % of samples over 8.3 ms), but the kernel's kill timeout is not reached by a synthetic ALU kernel of up to 12 s.
+Data: [data/20261122-ramp-default-preempt-long/](../data/20261122-ramp-default-preempt-long/).
+**Conclusion so far:** the probe reproduces the missing-preemption symptom (compositor latency scales with dispatch
+length) but not the #2701 timeouts. The #2701 boot had 116 timeouts under llama.cpp-style load, so the trigger likely
+needs more than one client submitting or memory pressure (cf. the OOM-related timeout in G29). The `compute_preempt=1`
+test (docs/preempt-test.md) still needs a reboot, so it waits for the S2R session; no message was sent, no hook changed.
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry
