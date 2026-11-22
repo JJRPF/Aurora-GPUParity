@@ -1,7 +1,7 @@
 // gpuprobe: a reproducer for GPU compute scheduling problems (aurora-silicon/linux#2701).
 //
-//   gpuprobe dispatch --ms N --count K [--inflight 2]
-//       K compute dispatches of about N ms each, INFLIGHT submitted at a time (llama.cpp
+//   gpuprobe dispatch --ms N --count K [--inflight 2] [--reps R]
+//       K submissions of R dispatches (default 1) of about N ms each, with a barrier between them, INFLIGHT submitted at a time (llama.cpp
 //       keeps more than one in flight). Every result buffer is hashed and compared with the
 //       first one: a wrong answer after a GPU recovery is reported.
 //   gpuprobe latency --seconds S [--period-ms 16]
@@ -71,7 +71,7 @@ static void setup(void) {
   vkUpdateDescriptorSets(dev, 1, &w, 0, NULL);
 }
 
-static VkCommandBuffer record(uint32_t iters, uint32_t groups) {
+static VkCommandBuffer record(uint32_t iters, uint32_t groups, int reps) {
   VkCommandBufferAllocateInfo ai = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, .commandPool = pool, .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY, .commandBufferCount = 1 };
   VkCommandBuffer cb; VK(vkAllocateCommandBuffers(dev, &ai, &cb));
   VkCommandBufferBeginInfo bi = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
@@ -79,26 +79,31 @@ static VkCommandBuffer record(uint32_t iters, uint32_t groups) {
   vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_COMPUTE, pipe);
   vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_COMPUTE, pl, 0, 1, &ds, 0, NULL);
   uint32_t pc[2] = { iters, N_INVOC }; vkCmdPushConstants(cb, pl, VK_SHADER_STAGE_COMPUTE_BIT, 0, 8, pc);
-  vkCmdDispatch(cb, groups, 1, 1); VK(vkEndCommandBuffer(cb)); return cb;
+  VkMemoryBarrier mb = { .sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER, .srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT, .dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT };
+  for (int r = 0; r < reps; r++) {
+    vkCmdDispatch(cb, groups, 1, 1);
+    if (r + 1 < reps) vkCmdPipelineBarrier(cb, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0, NULL, 0, NULL);
+  }
+  VK(vkEndCommandBuffer(cb)); return cb;
 }
 static VkFence new_fence(void) { VkFenceCreateInfo fi = { .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO }; VkFence f; VK(vkCreateFence(dev, &fi, NULL, &f)); return f; }
 static void submit(VkCommandBuffer cb, VkFence f) { VkSubmitInfo si = { .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO, .commandBufferCount = 1, .pCommandBuffers = &cb }; VK(vkQueueSubmit(q, 1, &si, f)); }
 static void wait(VkFence f) { VK(vkWaitForFences(dev, 1, &f, VK_TRUE, UINT64_MAX)); }
 static uint64_t fnv(const void *p, size_t n) { const uint8_t *b = p; uint64_t h = 1469598103934665603ull; for (size_t i = 0; i < n; i++) { h ^= b[i]; h *= 1099511628211ull; } return h; }
-static double timed_run(uint32_t iters) { VkCommandBuffer cb = record(iters, N_INVOC / 64); VkFence f = new_fence(); double t = now_ms(); submit(cb, f); wait(f); t = now_ms() - t; vkDestroyFence(dev, f, NULL); vkFreeCommandBuffers(dev, pool, 1, &cb); return t; }
+static double timed_run(uint32_t iters) { VkCommandBuffer cb = record(iters, N_INVOC / 64, 1); VkFence f = new_fence(); double t = now_ms(); submit(cb, f); wait(f); t = now_ms() - t; vkDestroyFence(dev, f, NULL); vkFreeCommandBuffers(dev, pool, 1, &cb); return t; }
 static int cmpd(const void *a, const void *b) { double x = *(const double *)a, y = *(const double *)b; return (x > y) - (x < y); }
 
 int main(int argc, char **argv) {
   if (argc < 2) { fprintf(stderr, "usage: gpuprobe dispatch --ms N --count K [--inflight 2] | latency --seconds S [--period-ms 16]\n"); return 2; }
-  const char *mode = argv[1]; double ms = 100, secs = 10, period = 16; int count = 5, inflight = 2;
+  const char *mode = argv[1]; double ms = 100, secs = 10, period = 16; int count = 5, inflight = 2, reps = 1;
   for (int i = 2; i + 1 < argc; i += 2) {
     if (!strcmp(argv[i], "--ms")) ms = atof(argv[i + 1]); else if (!strcmp(argv[i], "--count")) count = atoi(argv[i + 1]);
-    else if (!strcmp(argv[i], "--inflight")) inflight = atoi(argv[i + 1]); else if (!strcmp(argv[i], "--seconds")) secs = atof(argv[i + 1]);
+    else if (!strcmp(argv[i], "--inflight")) inflight = atoi(argv[i + 1]); else if (!strcmp(argv[i], "--reps")) reps = atoi(argv[i + 1]); else if (!strcmp(argv[i], "--seconds")) secs = atof(argv[i + 1]);
     else if (!strcmp(argv[i], "--period-ms")) period = atof(argv[i + 1]); else { fprintf(stderr, "unknown %s\n", argv[i]); return 2; }
   }
   setup();
   if (!strcmp(mode, "latency")) {
-    VkCommandBuffer cb = record(1, 1); VkFence f = new_fence(); int cap = (int)(secs * 1000 / period) + 16, n = 0; double *s = malloc(cap * sizeof *s); double end = now_ms() + secs * 1000;
+    VkCommandBuffer cb = record(1, 1, 1); VkFence f = new_fence(); int cap = (int)(secs * 1000 / period) + 16, n = 0; double *s = malloc(cap * sizeof *s); double end = now_ms() + secs * 1000;
     while (now_ms() < end && n < cap) { double t = now_ms(); vkResetFences(dev, 1, &f); submit(cb, f); wait(f); s[n++] = now_ms() - t; double rest = period - (now_ms() - t); if (rest > 0) { struct timespec ts = { 0, (long)(rest * 1e6) }; nanosleep(&ts, NULL); } }
     double mx = 0; int over = 0; for (int i = 0; i < n; i++) { if (s[i] > mx) mx = s[i]; if (s[i] > 8.3) over++; }
     qsort(s, n, sizeof *s, cmpd);
@@ -110,7 +115,7 @@ int main(int argc, char **argv) {
   for (int pass = 0; pass < 3; pass++) { uint32_t ni = (uint32_t)fmin(4e9, fmax(1, iters * (ms / fmax(t, 0.01)))); iters = ni; t = timed_run(iters); fprintf(stderr, "calibrate: iters=%u -> %.1f ms\n", iters, t); if (fabs(t - ms) < 0.1 * ms) break; }
   uint64_t ref = 0; double *d = calloc(count, sizeof *d); int bad = 0;
   VkCommandBuffer *cb = calloc(inflight, sizeof *cb); VkFence *fe = calloc(inflight, sizeof *fe); double *t0 = calloc(inflight, sizeof *t0);
-  for (int i = 0; i < inflight; i++) { cb[i] = record(iters, N_INVOC / 64); fe[i] = new_fence(); }
+  for (int i = 0; i < inflight; i++) { cb[i] = record(iters, N_INVOC / 64, reps); fe[i] = new_fence(); }
   int sub = 0, done = 0; double start = now_ms();
   while (done < count) {
     while (sub < count && sub - done < inflight) { int s = sub % inflight; vkResetFences(dev, 1, &fe[s]); t0[s] = now_ms(); submit(cb[s], fe[s]); sub++; }
@@ -119,6 +124,6 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dispatch %d: %.1f ms\n", done, d[done]); done++;
   }
   double tot = now_ms() - start, mx = 0; for (int i = 0; i < count; i++) if (d[i] > mx) mx = d[i];
-  printf("{\"mode\":\"dispatch\",\"target_ms\":%.0f,\"iters\":%u,\"count\":%d,\"inflight\":%d,\"max_ms\":%.1f,\"total_ms\":%.1f,\"hash\":\"%016llx\",\"hash_mismatches\":%d}\n", ms, iters, count, inflight, mx, tot, (unsigned long long)ref, bad);
+  printf("{\"mode\":\"dispatch\",\"target_ms\":%.0f,\"reps\":%d,\"iters\":%u,\"count\":%d,\"inflight\":%d,\"max_ms\":%.1f,\"total_ms\":%.1f,\"hash\":\"%016llx\",\"hash_mismatches\":%d}\n", ms, reps, iters, count, inflight, mx, tot, (unsigned long long)ref, bad);
   return bad ? 1 : 0;
 }
