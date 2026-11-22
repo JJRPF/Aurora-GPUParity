@@ -147,6 +147,11 @@ with T6031/G14S lines and a Nov 10 date could be a journal copied here for the S
 the first baseline step still checks which boot and which machine the journal lines belong to
 (`journalctl --list-boots`, `/proc/device-tree/compatible`) before any count is used.
 
+**G25. S2R session replied.** `gh-5-s2r-djnaeempaths-ea` confirmed the channel and the protocol: it will
+message this session to save and stop before any S2R reboot, and will not reboot until this session replies
+that it is safe. It says nothing is armed (S2R is waiting on an outside answer), so no reboot is expected
+soon. No reply sent; none needed. Still no GPU test boot until its sign-off or the user says otherwise.
+
 ## Open at the end of this section
 
 * Is `/sys/module/asahi/parameters/` missing `compute_preempt` because the parameter has no sysfs entry
