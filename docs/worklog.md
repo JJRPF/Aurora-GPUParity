@@ -266,3 +266,13 @@ and in this machine's Claude memory.
 * G13's journal oddity.
 * Next step is phase 1, step 1 of [plan.md](plan.md): record a baseline. No reboot before the S2R session
   signs off.
+
+## 2026-11-23: website
+
+**G38. /GPU page made live (user).** The user asked for jjrpf.com/GPU to work and look like /S2R, and chose to make
+this repo public for it. Added [gpu-status.json](gpu-status.json): phases, pieces, runs (G29 to G36), findings,
+measurements, rules, unknowns, credits; every number in it is taken from G29 to G36 and their `data/` folders. The
+page (JJRPF/jjrpf.com, `GPU/index.html`) reads this file, [status.md](status.md), this worklog (one entry per `**G<n>.**`
+step) and the commit list straight from `main`, and falls back to a copy built into the page while the repo is
+private or GitHub is unreachable. Its "Right now" line is the KV key `gpu-message` (`/api/gpu-message`). Nothing on
+the machine was touched; no message to the S2R session needed.

@@ -19,6 +19,16 @@ Research repo for GPU parity with macOS on the M2 Pro (T6020, J414s). See README
 * **This machine is the test machine.** A boot with a non-default GPU or kernel setting, or anything that
   can wedge the GPU, is logged in the worklog first and confirmed with the user before it happens.
 
+## The public page
+
+https://jjrpf.com/GPU/ reads `docs/gpu-status.json`, `docs/status.md`, `docs/worklog.md` and the commit list
+from `main`. Keep `docs/gpu-status.json` current in the same commit as the worklog step that changes it: set
+`updated`, move phase items from `next` to `done`, add each run to `runs` (`outcome`: pass, fail, info, running),
+and keep `overall` as the hand-set figure. States: phases done/active/paused/partial/started/todo; pieces
+works/tested/partial/open. Text fields take `code`, **bold** and [links](file.md) only. Check it parses with
+`python3 -m json.tool docs/gpu-status.json` before committing. Worklog steps must start with `**G<n>. Title.**`
+for the page to list them.
+
 ## Attribution (follows Aurora Silicon's contributing guide)
 
 * Commits carry the user's git identity only. **No `Co-Authored-By`, `Claude-Session` or any other AI
