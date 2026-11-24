@@ -276,3 +276,12 @@ page (JJRPF/jjrpf.com, `GPU/index.html`) reads this file, [status.md](status.md)
 step) and the commit list straight from `main`, and falls back to a copy built into the page while the repo is
 private or GitHub is unreachable. Its "Right now" line is the KV key `gpu-message` (`/api/gpu-message`). Nothing on
 the machine was touched; no message to the S2R session needed.
+
+## 2026-11-24: handoff
+
+**G39. Handoff prompt for AGY.** The user asked for a detailed handoff for AGY. Wrote [handoff-agy.md](handoff-agy.md)
+(goal, machine, where everything is, what is established with data folders, next steps in order, rules, S2R
+coordination, pitfalls). The start-of-work notice to the S2R session (`gh-5-s2r-djnaeempaths-ea`) could not be
+delivered: the session was no longer listed (probably ended by its reboot on 2026-11-22). Nothing on the machine was
+touched; no hooks, modprobe files or boot options changed.
+
