@@ -285,3 +285,34 @@ coordination, pitfalls). The start-of-work notice to the S2R session (`gh-5-s2r-
 delivered: the session was no longer listed (probably ended by its reboot on 2026-11-22). Nothing on the machine was
 touched; no hooks, modprobe files or boot options changed.
 
+**G40. AGY takeover, Lichen coordination, and machine verification (17:51-18:00).** Verified machine state:
+`uname -r` = `7.2.11-16-1-ARCH`, `linux-aurora 7.2.11.aurora16-1`, `mesa-aurora
+1:26.3.0_devel.20261107.231485.b7b03c5b3b8-3`, `asahi` module loaded (59 users), `journalctl -t kernel --grep 'GPU
+timeout' --since '-1d'` returned 0 entries. Rebuilt `harness/gpuprobe/build.sh` cleanly. Checked S2R state:
+`deepidle-runner.service` not-found, `/etc/modprobe.d/` has only `omarchy-mac-touchid.conf` and
+`omarchy-usb-autosuspend.conf`. Located the exact #2701 workloads already installed locally via `omarchy-local-ai`:
+`ace-step-1.5-turbo-acestep-apple` (port 11437, `MemoryMax=12 GiB`) and `flux2-klein-4b-sdcpp-apple` (port 11436,
+`MemoryMax=15.75 GiB`), none currently running; 19.2 GiB RAM available, `gpu_memory` `user_committed` 2.44 GB.
+*Mistake & correction (Lichen):* Initially accepted the user's single-use Lichen invite (`6rb77mzfev8v934bgsj8`)
+using `~/.lichen/token.json`, which belonged to `S2R-AGY` (`agt_r9tc7gmyiuuq`), consuming that invite under `S2R-AGY`
+and posting the notice there (`r_4zsxzvfdb9in:1`). Then enrolled `GPU-AGY` (`agt_vnsk5j4wyyy8`) into
+`~/.lichen/gpu-agy.json` (mode `0600`, preserving `S2R-AGY`'s token), set profile, and sent `S2R-AGY` a direct
+message with the start-of-work and safe-to-reboot notice. Waiting on a fresh invite/add for `GPU-AGY` into
+`#S2R-GPU Coordination`.
+
+**G41. Upstream reply on aurora-silicon/linux#2701; repro paused for 7.3 kernel upgrade (18:00).** Read
+`DjDeveloperr`'s reply on `aurora-silicon/linux#2701` (`issuecomment-7141403144`, 2026-11-24):
+* On the 7.3 kernel series, the DRM driver is renamed from `asahi` to `aurora`, and `compute_preempt` is exposed as
+  `aurora.compute_preempt=1` (readable at `/sys/module/aurora/parameters/compute_preempt`; `-1` default still enables
+  it only on M2 Max or Debug0).
+* Preemption keeps the desktop responsive, though a single dispatch exceeding the firmware deadline or hitting an
+  `Unmapped` read fault (`gCDM_CS`/`gCDM_ID`) still triggers recovery. Also notes stock Fedora Mesa 26.2.7 inside
+  Podman vs Aurora's `mesa-aurora` can cause driver/shader mismatches on Apple GPUs.
+* Upstream asks for 7.3 test results with `aurora.compute_preempt=1` (and matching Aurora Mesa if possible):
+  `uname -a`, `pacman -Q linux-aurora mesa-aurora vulkan-aurora`, `cat /sys/module/aurora/parameters/compute_preempt`,
+  and `journalctl -b -k | grep -E 'aurora|asahi|Fault|timeout'`.
+Held off on running the 7.2.11 ACE-Step repro per user instruction: `S2R-AGY` is upgrading the machine to kernel 7.3
+first. Machine left completely clean and ready for reboot.
+
+
+
