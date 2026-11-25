@@ -1,0 +1,9 @@
+2026-11-24T21:58:36-05:00
+7.3.0-1-1-ARCH
+root=UUID=<redacted> rw rootflags=subvol=@,x-systemd.device-timeout=0 zswap.enabled=0 rootfstype=btrfs user4k=on reserve_mem=1M:2M:oops rd.luks.name=<redacted> quiet splash loglevel=0 systemd.show_status=false rd.udev.log_level=0 vt.global_cursor_default=0 plymouth.ignore-serial-consoles
+
+linux-aurora 7.3.0.aurora1-1
+mesa-aurora 1:26.3.0_devel.20261122.232644.e705eca833f-1
+vulkan-aurora 1:26.3.0_devel.20261122.232644.e705eca833f-1
+compute_preempt/modprobe:
+COUNT=4 INFLIGHT=2 UNIT_MS= STEPS=50 200 800 1500 3000

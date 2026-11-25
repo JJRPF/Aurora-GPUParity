@@ -117,7 +117,8 @@
     { "n": "G35", "what": "Ramp, batched 20 ms dispatches, 100 ms to 10 s", "result": "0 timeouts; p95 wait 0.72 to 0.79 ms from 800 ms up", "outcome": "pass" },
     { "n": "G36", "what": "Single dispatches of 6 s and 12 s", "result": "0 timeouts, 0 hash mismatches; p95 wait 68 to 69 ms, max 168 ms", "outcome": "info" },
     { "n": "G41", "what": "Upstream reply on #2701: 7.3 renames driver to `aurora`", "result": "Test paused for S2R kernel 7.3 upgrade; will test `aurora.compute_preempt=1` on 7.3", "outcome": "info" },
-    { "n": "Next", "what": "Test `aurora.compute_preempt=1` on kernel 7.3", "result": "Waits for S2R kernel 7.3 upgrade", "outcome": "" }
+    { "n": "G44", "what": "Kernel 7.3.0 default (`aurora`): `gpuprobe`, ACE-Step 60 s, FLUX.2 1024×1024 on host `vulkan-aurora`", "result": "0 timeouts and 0 faults across all three; `gpuprobe` 3 s p95 still 34.12 ms (31.9% > 8.3 ms)", "outcome": "pass" },
+    { "n": "Next", "what": "One boot on 7.3.0 with `options aurora compute_preempt=1`", "result": "A/B latency, throughput, and #2701 reply to DJ", "outcome": "running" }
   ],
   "prior_art": [
     { "name": "linux-aurora#25", "what": "G14X compute preemption: automatic on M2 Max, opt-in on Pro and Ultra pending qualification. 0 timeouts with it on M2 Max; about 1% throughput cost there, 12 to 20% on M1 decode." },

@@ -314,5 +314,60 @@ message with the start-of-work and safe-to-reboot notice. Waiting on a fresh inv
 Held off on running the 7.2.11 ACE-Step repro per user instruction: `S2R-AGY` is upgrading the machine to kernel 7.3
 first. Machine left completely clean and ready for reboot.
 
+## 2026-11-24 (evening): kernel 7.3.0 testing for #2701
+
+**G42. Booted on `7.3.0-1-1-ARCH`; driver & parameter verification (21:57).** After `S2R-AGY` upgraded the system and
+rebooted, verified `uname -a`: `Linux omarchy 7.3.0-1-1-ARCH #1 SMP PREEMPT_DYNAMIC Mon, 23 Nov 2026 04:30:14 +0000
+aarch64 GNU/Linux`. Packages: `linux-aurora 7.3.0.aurora1-1`, `mesa-aurora 1:26.3.0_devel.20261122.232644.e705eca833f-1`,
+`vulkan-aurora 1:26.3.0_devel.20261122.232644.e705eca833f-1`. Kernel module is now `aurora` (44 users); `modinfo -p
+aurora` lists `compute_preempt:Compute preemption (-1: M2 Max or Debug0; 0: off; nonzero: on) (i32)`. **Important:**
+`/sys/module/aurora/parameters/compute_preempt` still does NOT exist (`No such file or directory`), so the parameter
+cannot be read back via sysfs on `7.3.0.aurora1-1`. Kernel cmdline is default (no `aurora.*` params). New in 7.3:
+`aurora: GPU memory limits: device 21222 MiB, per client 15837 MiB`. Available RAM: 25.2 GiB; `gpu_memory`
+`user_committed` 1.58 GB. `gpuprobe` 20 ms smoke test passed (`20.2 ms`, 0 mismatches).
+
+**G43. Before 7.3.0 default baseline runs (risk logged).** Running (1) `gpuprobe` single-dispatch ramp (`50 200 800
+1500 3000` ms, `COUNT=4`) and (2) ACE-Step 1.5 Turbo 30 s song generation alongside `gpuprobe latency` on stock
+`7.3.0-1-1-ARCH` (`compute_preempt` default `-1`, off for T6020), monitoring `journalctl -b -k` for `aurora|asahi|Fault|timeout`
+and stopping immediately on the first GPU timeout or if available RAM drops below 6 GiB. Risk: a GPU timeout may stall
+or corrupt the desktop. Way back: stop the ACE-Step container unit; nothing on the kernel or boot config is changed.
+Data target: `data/20261124-73-default-ramp/` and `data/20261124-73-default-acestep/`.
+
+**G44. 7.3.0 default baseline results (`gpuprobe` + native `Vulkan0` ACE-Step) and pre-run risk log for FLUX.2 (22:12).**
+* `gpuprobe` ramp (`50 200 800 1500 3000` ms, `COUNT=4`, `data/20261124-73-default-ramp/`): **0 GPU timeouts**, 0 hash
+  mismatches; second-client latency scales with dispatch length just as on 7.2.11: p95 `2.85 ms` (50 ms), `3.33 ms`
+  (200 ms), `7.16 ms` (800 ms), `15.77 ms` (1500 ms, 27.1% > 8.3 ms, max 218.85 ms), `34.12 ms` (3000 ms, 31.9% > 8.3
+  ms, max 128.16 ms).
+* **Container Mesa mismatch confirmed:** Running the existing `omarchy-local-ai` Podman container (Fedora 44 Mesa
+  26.2.7) on kernel `7.3.0-1-1-ARCH` silently fell back to CPU (`[Load] LM/DiT/VAE backend: CPU`) because the kernel
+  DRM driver was renamed `asahi` → `aurora`.
+* **ACE-Step 1.5 Turbo (60 s song) natively on host `vulkan-aurora` (`26.3.0_devel.20261122.e705eca833f-1`)**
+  (`data/20261124-73-default-acestep/`): extracted `ace-server` to `~/.cache/gpuparity/bin/ace-server` and ran with
+  `--device Vulkan0`. All stages ran on `Vulkan0` (peak `gpu_memory` `user_committed` 8.75 GB, min available RAM 17.8
+  GiB): LM `41.51 s`, Synth `35.44 s`, MP3 `1,344,189 B`, **0 GPU timeouts, 0 GPU faults**, second-client latency
+  during `/synth`: `p50=0.63 ms`, `p95=2.73 ms`, `p99=7.16 ms`, `max=24.15 ms` (`0.7%` > 8.3 ms).
+* **Before FLUX.2 Klein 4B run (risk logged):** Next running 1 `1024x1024` 4-step FLUX.2 Klein 4B image natively via
+  `~/.cache/gpuparity/bin/sd-server` against host `vulkan-aurora` (`HK_SYSMEM=16911433728`) alongside `gpuprobe
+  latency`, with 1 Hz timeout/fault/RAM monitoring (auto-stops on first `GPU timeout` / `FaultInfo` or RAM < 6 GiB).
+  Risk: in #2701 FLUX.2 caused `gCDM_CS`/`gCDM_ID` unmapped-read faults and magenta corruption. Way back: `sd-server`
+  is killed immediately on first error; nothing on kernel/boot config is changed. Data target:
+  `data/20261124-73-default-flux/`.
+* **FLUX.2 Klein 4B result (`data/20261124-73-default-flux/`):** `1024x1024`, 4 steps, `Vulkan0` (`Apple M2 Pro (G14S
+  B1) (Borealis)`): completed cleanly (`gen_rc=0`) in `161.43 s`, PNG `1,939,989 B` (`sha256: 926499aa...`), peak
+  `gpu_memory` `user_committed` `17.95 GB`, **0 GPU timeouts, 0 GPU faults**, no desktop corruption. Second-client
+  latency during the first 60 s: `p50=0.75 ms`, `p95=2.78 ms`, `p99=4.96 ms`, `max=79.48 ms` (`0.1%` > 8.3 ms).
+  (Note: the 1 Hz low-RAM guard tripped at `4266 MiB` available right at the end as generation completed.)
+
+**G45. Before reboot with `options aurora compute_preempt=1` (boot-affecting change logged first).** Writing
+`options aurora compute_preempt=1` to `/etc/modprobe.d/zz-gpuparity.conf` and rebooting once into `7.3.0-1-1-ARCH` to
+measure the A/B effect of compute preemption on `gpuprobe` (`50–3000 ms`), ACE-Step 1.5 Turbo, and FLUX.2 Klein 4B,
+and to answer `DjDeveloperr` on `aurora-silicon/linux#2701`. Risk: untested setting on T6020 (M2 Pro); a hung GPU
+would require a reboot. Way back: delete `/etc/modprobe.d/zz-gpuparity.conf` immediately after booting into the test
+boot (once `aurora` is loaded, removing the file guarantees any subsequent reboot returns to stock 7.3.0). Kernel
+command line and GRUB/m1n1/DeepIdle hooks are untouched.
+
+
+
+
 
 
