@@ -1,0 +1,12 @@
+{
+  "ready": 1,
+  "gen_rc": 0,
+  "gen_s": 164.51,
+  "img_bytes": 1953366,
+  "img_sha256": "6927c053f9482bb76ff1aec04f8b96e79a4a514ebd0c6321dc581b36fa757bc5",
+  "gpu_timeouts": 0,
+  "gpu_faults": 0,
+  "peak_gpu_committed_bytes": 17941430272,
+  "min_avail_mib": 4185,
+  "stopped": "STOPPED: low_ram avail_mib=4185"
+}

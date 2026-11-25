@@ -380,6 +380,28 @@ file is never read unless baked into the UKI (`omarchy_linux-aurora.efi`). This 
   `/boot/efi/limine.conf.bak-gpuparity` right after boot (before running any test) so any subsequent reboot is 100%
   stock 7.3.0.
 
+**G47. Kernel `7.3.0-1-1-ARCH` with `aurora.compute_preempt=1` A/B results (22:21-22:28).** Booted with
+`aurora.compute_preempt=1` verified in `/proc/cmdline` and immediately restored `/boot/efi/limine.conf` from backup so
+the next reboot is stock 7.3.0. Confirmed `/sys/module/aurora/parameters/compute_preempt` still does not exist
+(`No such file or directory`) even when set on the kernel command line. Ran the exact same three workloads on native
+host `vulkan-aurora` (`1:26.3.0_devel.20261122.232644.e705eca833f-1`):
+* **`gpuprobe` ramp (`50–3000 ms`, `COUNT=4`, `data/20261124-73-preempt1-ramp/`):** **0 GPU timeouts, 0 hash
+  mismatches.** Second-client latency dropped dramatically vs 7.3 default (`data/20261124-73-default-ramp/`):
+  * `800 ms`: max `51.78 ms` → `8.08 ms` (`3.9%` → `0.0%` > 8.3 ms)
+  * `1500 ms`: p95 `15.77 ms` → `11.93 ms`, max `218.85 ms` → `13.69 ms` (`27.1%` → `9.4%` > 8.3 ms)
+  * `3000 ms`: p95 `34.12 ms` → `13.71 ms`, max `128.16 ms` → `26.50 ms` (`31.9%` → `18.3%` > 8.3 ms)
+* **ACE-Step 1.5 Turbo (60 s song, `seed=42`, `data/20261124-73-preempt1-acestep/`):** LM `42.52 s` (vs `41.51 s`,
+  +2.4%), Synth `35.46 s` (vs `35.44 s`, +0.06%), total `77.98 s` (+1.3% overhead), **0 GPU timeouts, 0 GPU faults**,
+  peak `gpu_memory` `8.75 GB`. **Bit-for-bit identical MP3 SHA-256**
+  (`b5747934fee41874a59ea345b846667662aa6b5ccf73783a3713b2e0d68a68b9`). Second-client `max_ms` dropped from `24.15 ms`
+  to `11.04 ms` (`p95 = 2.66 ms`).
+* **FLUX.2 Klein 4B (`1024×1024`, 4 steps, `data/20261124-73-preempt1-flux/`):** `164.51 s` (vs `161.43 s`, +1.9%
+  overhead), **0 GPU timeouts, 0 GPU faults**, peak `gpu_memory` `17.94 GB`. Second-client `max_ms` dropped 11× from
+  `79.48 ms` to **`7.22 ms`** (`0.0%` > 8.3 ms; `p95 = 4.41 ms`).
+* Posted results to `aurora-silicon/linux#2701` in reply to `DjDeveloperr` and handed priority back to `S2R-AGY` in
+  `#Coordination`.
+
+
 
 
 

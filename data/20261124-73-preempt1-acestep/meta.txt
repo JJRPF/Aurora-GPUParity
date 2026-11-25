@@ -1,0 +1,10 @@
+2026-11-24T22:23:16-05:00
+Linux omarchy 7.3.0-1-1-ARCH #1 SMP PREEMPT_DYNAMIC Mon, 23 Nov 2026 04:30:14 +0000 aarch64 GNU/Linux
+linux-aurora 7.3.0.aurora1-1
+mesa-aurora 1:26.3.0_devel.20261122.232644.e705eca833f-1
+vulkan-aurora 1:26.3.0_devel.20261122.232644.e705eca833f-1
+modprobe aurora:
+(none)
+sysfs compute_preempt:
+cat: /sys/module/aurora/parameters/compute_preempt: No such file or directory
+ace_bin=/home/jjr/.cache/gpuparity/bin/ace-server device=Vulkan0 duration=60 (native host vulkan-aurora)

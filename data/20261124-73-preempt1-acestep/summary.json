@@ -1,0 +1,14 @@
+{
+  "duration_s": 60,
+  "lm_rc": 0,
+  "lm_s": 42.52,
+  "synth_rc": 0,
+  "synth_s": 35.46,
+  "mp3_bytes": 1344189,
+  "mp3_sha256": "b5747934fee41874a59ea345b846667662aa6b5ccf73783a3713b2e0d68a68b9",
+  "gpu_timeouts": 0,
+  "gpu_faults": 0,
+  "peak_gpu_committed_bytes": 8746500096,
+  "min_avail_mib": 18138,
+  "stopped": ""
+}
