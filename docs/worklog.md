@@ -366,6 +366,21 @@ would require a reboot. Way back: delete `/etc/modprobe.d/zz-gpuparity.conf` imm
 boot (once `aurora` is loaded, removing the file guarantees any subsequent reboot returns to stock 7.3.0). Kernel
 command line and GRUB/m1n1/DeepIdle hooks are untouched.
 
+**G46. Mistake & correction: `aurora` loads in initramfs before `/etc/modprobe.d/` (22:19).** After booting on
+`7.3.0-1-1-ARCH` and removing `/etc/modprobe.d/zz-gpuparity.conf`, the `gpuprobe` ramp
+(`data/20261124-73-preempt1-ramp/`, actually still default preemption!) still showed `p95 = 24.31 ms` (`41.1% > 8.3
+ms`) at 3000 ms. Checking boot timestamps revealed why: `aurora` loads at `0.64 s` **inside the initramfs** (`kms` +
+`modconf` hooks in `/etc/mkinitcpio.conf`), `5.6 s` before `Switch Root` (`6.25 s`), so a rootfs `/etc/modprobe.d/`
+file is never read unless baked into the UKI (`omarchy_linux-aurora.efi`). This corrects the assumption in G30 and
+[preempt-test.md](preempt-test.md).
+* **Before cmdline reboot (boot-affecting change logged first):** Backing up `/boot/efi/limine.conf` to
+  `/boot/efi/limine.conf.bak-gpuparity`, appending `aurora.compute_preempt=1` to the `//linux-aurora` `cmdline:` line
+  only (leaving `/DeepTest` and all other entries untouched), and rebooting once into `7.3.0-1-1-ARCH`. Risk: untested
+  setting on T6020; a hung GPU would require a reboot. Way back: immediately restore `/boot/efi/limine.conf` from
+  `/boot/efi/limine.conf.bak-gpuparity` right after boot (before running any test) so any subsequent reboot is 100%
+  stock 7.3.0.
+
+
 
 
 
